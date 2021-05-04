@@ -1,0 +1,88 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: automation-analytics-acceptance
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: automation-analytics-acceptance-${IMAGE_TAG}
+  spec:
+    backoffLimit: 5
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - image: ${IMAGE}:${IMAGE_TAG}
+            imagePullPolicy: Always
+            name: automation-analytics-acceptance
+            env:
+              - name: APP
+                value: metrics
+              - name: USE_CLOUDWATCH_LOGGING
+                value: 'true'
+              - name: CW_LOG_GROUP
+                valueFrom:
+                  secretKeyRef:
+                    key: log_group_name
+                    name: cloudwatch
+              - name: CW_AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    key: aws_access_key_id
+                    name: cloudwatch
+              - name: CW_AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: aws_secret_access_key
+                    name: cloudwatch
+              - name: POSTGRESQL_USER
+                valueFrom:
+                  secretKeyRef:
+                    key: db.user
+                    name: automation-analytics-db
+              - name: POSTGRESQL_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: db.password
+                    name: automation-analytics-db
+              - name: POSTGRESQL_HOST
+                valueFrom:
+                  secretKeyRef:
+                    key: db.host
+                    name: automation-analytics-db
+              - name: POSTGRESQL_PORT
+                valueFrom:
+                  secretKeyRef:
+                    key: db.port
+                    name: automation-analytics-db
+              - name: POSTGRESQL_DATABASE
+                value: ${POSTGRESQL_DATABASE}
+              - name: DJANGO_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: DJANGO_SECRET_KEY
+                    name: django
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: DJANGO_SECRET_KEY
+                    name: django
+              - name: DJANGO_SETTINGS_MODULE
+                value: config.settings.production
+              - name: DJANGO_ADMIN_URL
+                value: /admin
+              - name: DB_SSLMODE
+                value: ${DB_SSLMODE}
+              - name: DB_SSLROOTCERT
+                valueFrom:
+                  secretKeyRef:
+                    key: rds-cacert
+                    name: rds-client-ca
+parameters:
+- name: IMAGE
+  value: quay.io/repository/cloudservices/automation-analytics-api
+- name: IMAGE_TAG
+  value: ''
+  required: true
