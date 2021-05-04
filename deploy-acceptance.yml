@@ -82,7 +82,7 @@ objects:
                     name: rds-client-ca
 parameters:
 - name: IMAGE
-  value: quay.io/repository/cloudservices/automation-analytics-api
+  value: quay.io/cloudservices/automation-analytics-api
 - name: IMAGE_TAG
   value: ''
   required: true
