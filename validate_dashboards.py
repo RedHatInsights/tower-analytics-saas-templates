@@ -44,6 +44,9 @@ def validate(f):
 seen_error = False
 
 for f in os.listdir("dashboards"):
+    if f.endswith('.json'):
+        continue
+
     for err in validate("dashboards/" + f):
         seen_error = True
         print(err)
